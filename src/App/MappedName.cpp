@@ -20,34 +20,10 @@
  *                                                                          *
  ****************************************************************************/
 
-#include "PreCompiled.h"
-
-#ifndef _PreComp_
-# include <unordered_set>
-#endif
-
-//#include <boost/functional/hash.hpp>
 
 #include "MappedName.h"
 
 using namespace Data;
 
 
-void MappedName::compact()
-{
-
-    if (this->raw) {
-        this->data = QByteArray(this->data.constData(), this->data.size());
-        this->raw = false;
-    }
-
-#if 0
-    static std::unordered_set<QByteArray, ByteArrayHasher> PostfixSet;
-    if (this->postfix.size()) {
-        auto res = PostfixSet.insert(this->postfix);
-        if (!res.second)
-            self->postfix = *res.first;
-    }
-#endif
-}
 
