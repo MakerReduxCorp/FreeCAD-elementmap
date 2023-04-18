@@ -39,8 +39,8 @@ public:
 
     bool hasLocalCopy() const { return owner; }
     
-    operator const T&() & const { return *handle; }
-    operator T&() &
+    operator const T&() const { return *handle; }
+    operator T&()
     {
         createLocalCopy();
         return *handle;
