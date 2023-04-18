@@ -35,8 +35,6 @@
 #include "IndexedName.h"
 
 
-#include <iostream>
-
 namespace Data
 {
 
