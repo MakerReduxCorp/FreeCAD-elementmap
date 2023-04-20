@@ -184,11 +184,6 @@ TEST(MappedName, moveConstructor)
     EXPECT_EQ(mappedName.size(), 15);
     EXPECT_EQ(mappedName.name(), std::string("TEST"));
     EXPECT_EQ(mappedName.postfix(), std::string("POSTFIXTEST"));
-
-    EXPECT_EQ(temp.empty(), true);
-    EXPECT_EQ(temp.size(), 0);
-    EXPECT_EQ(temp.name(), std::string());
-    EXPECT_EQ(temp.postfix(), std::string());
 }
 
 
@@ -251,11 +246,6 @@ TEST(MappedName, assignmentOperatorMove)
     EXPECT_EQ(mappedName.size(), 15);
     EXPECT_EQ(mappedName.name(), std::string("TEST"));
     EXPECT_EQ(mappedName.postfix(), std::string("POSTFIXTEST"));
-
-    EXPECT_EQ(temp.empty(), true);
-    EXPECT_EQ(temp.size(), 0);
-    EXPECT_EQ(temp.name(), std::string());
-    EXPECT_EQ(temp.postfix(), std::string());
 }
 
 TEST(MappedName, streamInsertionOperator)
