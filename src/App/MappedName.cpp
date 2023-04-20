@@ -41,7 +41,7 @@ MappedName::MappedName(const std::string& name)
     else {
         data = name;
     }
-    postfixStartIdx = data.size();
+    postfixStartIdx = ((std::string)data).size();
 }
 
 MappedName::MappedName(const char* name, size_t size)
@@ -52,9 +52,9 @@ MappedName::MappedName(const IndexedName& element)
     : data(element.getType())
 {
     if (element.getIndex() > 0) {
-        data += std::to_string(element.getIndex());
+        ((std::string&)data) += std::to_string(element.getIndex());
     }
-    postfixStartIdx = data.size();
+    postfixStartIdx = ((std::string)data).size();
 }
 
 MappedName::MappedName(const MappedName& other, size_t startPosition, size_t size)
@@ -63,7 +63,7 @@ MappedName::MappedName(const MappedName& other, size_t startPosition, size_t siz
 }
 
 MappedName::MappedName(const MappedName& other, const char* postfix)
-    : data(other.data + postfix),
+    : data(((std::string)other.data) + postfix),
       postfixStartIdx(other.size())
 {}
 
@@ -96,7 +96,7 @@ MappedName& MappedName::operator=(const char* other)
 
 bool MappedName::operator==(const MappedName& other) const
 {
-    return this->data == other.data;
+    return ((std::string)this->data) == ((std::string)other.data);
 }
 
 bool MappedName::operator!=(const MappedName& other) const
@@ -127,13 +127,13 @@ MappedName MappedName::operator+(const std::string& other) const
 
 MappedName& MappedName::operator+=(const char* other)
 {
-    this->data.append(other);
+    ((std::string&)this->data).append(other);
     return *this;
 }
 
 MappedName& MappedName::operator+=(const std::string& other)
 {
-    this->data.append(other);
+    ((std::string&)this->data).append(other);
     return *this;
 }
 
@@ -147,47 +147,47 @@ void MappedName::append(const char* dataToAppend, size_t size)
 {
     std::string stringToAppend =
         size != std::string::npos ? std::string(dataToAppend, size) : std::string(dataToAppend);
-    if (this->data.size() == 0) {
+    if (((std::string)this->data).size() == 0) {
         postfixStartIdx = stringToAppend.size();
     }
-    this->data.append(stringToAppend);
+    ((std::string&)this->data).append(stringToAppend);
 }
 
 void MappedName::append(const MappedName& other, size_t startPosition, size_t size)
 {
-    std::string stringToAppend = other.data.substr(startPosition, size);
-    if (this->data.size() == 0 && other.postfixStartIdx >= startPosition) {
+    std::string stringToAppend = ((std::string)other.data).substr(startPosition, size);
+    if (((std::string)this->data).size() == 0 && other.postfixStartIdx >= startPosition) {
         postfixStartIdx = other.postfixStartIdx - startPosition;
     }
-    this->data.append(stringToAppend);
+    ((std::string&)this->data).append(stringToAppend);
 }
 
 std::string MappedName::toString() const
 {
-    return this->data;
+    return ((std::string)this->data);
 }
 
 const std::string MappedName::name() const
 {
-    return this->data.substr(0, postfixStartIdx);
+    return ((std::string)this->data).substr(0, postfixStartIdx);
 }
 
 const std::string MappedName::postfix() const
 {
-    return this->data.substr(postfixStartIdx);
+    return ((std::string)this->data).substr(postfixStartIdx);
 }
 
 IndexedName MappedName::toIndexedName() const
 {
-    if (this->postfixStartIdx == this->data.size()) {
-        return IndexedName(this->data.c_str());
+    if (this->postfixStartIdx == ((std::string)this->data).size()) {
+        return IndexedName(((std::string)this->data).c_str());
     }
     return IndexedName();
 }
 
 int MappedName::compare(const MappedName& other) const
 {
-    auto val = this->data.compare(other.data);
+    auto val = ((std::string)this->data).compare(((std::string)other.data));
     if (val < 0) {
         return -1;
     }
@@ -204,17 +204,17 @@ bool MappedName::operator<(const MappedName& other) const
 
 char MappedName::operator[](size_t index) const
 {
-    return this->data[index];
+    return ((std::string)this->data)[index];
 }
 
 size_t MappedName::size() const
 {
-    return this->data.size();
+    return ((std::string)this->data).size();
 }
 
 bool MappedName::empty() const
 {
-    return this->data.empty();
+    return ((std::string)this->data).empty();
 }
 
 MappedName::operator bool() const
@@ -224,47 +224,47 @@ MappedName::operator bool() const
 
 void MappedName::clear()
 {
-    this->data.clear();
+    ((std::string&)this->data).clear();
     this->postfixStartIdx = 0;
 }
 
 size_t MappedName::find(const char* searchTarget, size_t startPosition) const
 {
-    return this->data.find(searchTarget, startPosition);
+    return ((std::string)this->data).find(searchTarget, startPosition);
 }
 
 size_t MappedName::find(const std::string& searchTarget, size_t startPosition) const
 {
-    return this->data.find(searchTarget, startPosition);
+    return ((std::string)this->data).find(searchTarget, startPosition);
 }
 
 size_t MappedName::rfind(const char* searchTarget, size_t startPosition) const
 {
-    return this->data.rfind(searchTarget, startPosition);
+    return ((std::string)this->data).rfind(searchTarget, startPosition);
 }
 
 size_t MappedName::rfind(const std::string& searchTarget, size_t startPosition) const
 {
-    return this->data.rfind(searchTarget, startPosition);
+    return ((std::string)this->data).rfind(searchTarget, startPosition);
 }
 
 /* These are string builtin in c++20 only, have to use boost I guess */
 bool MappedName::endsWith(const char* searchTarget) const
 {
-    return boost::ends_with(this->data, searchTarget);
+    return boost::ends_with(((std::string)this->data), searchTarget);
 }
 
 bool MappedName::endsWith(const std::string& searchTarget) const
 {
-    return boost::ends_with(this->data, searchTarget);
+    return boost::ends_with(((std::string)this->data), searchTarget);
 }
 
 bool MappedName::startsWith(const char* searchTarget, size_t offset) const
 {
-    return boost::starts_with(this->data.substr(offset), searchTarget);
+    return boost::starts_with(((std::string)this->data).substr(offset), searchTarget);
 }
 
 bool MappedName::startsWith(const std::string& searchTarget, size_t offset) const
 {
-    return boost::starts_with(this->data.substr(offset), searchTarget);
+    return boost::starts_with(((std::string)this->data).substr(offset), searchTarget);
 }
