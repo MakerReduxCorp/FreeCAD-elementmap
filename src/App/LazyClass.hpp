@@ -52,15 +52,23 @@ public:
     }
 
     bool hasLocalCopy() const { return owner; }
-    
+
+    const T& get() const { return *handle; }
+    T& get() { createLocalCopy(); return *handle; }
+
+    const T& operator*() const { return *handle; }
+    T& operator*() { createLocalCopy(); return *handle; }
+
+    const T* operator->() const { return &(*handle); }
+    T* operator->() { createLocalCopy(); return &(*handle); }
+
     operator const T&() const { return *handle; }
-    operator T&()
-    {
-        createLocalCopy();
-        return *handle;
-    }
+    operator T&() { createLocalCopy(); return *handle; }
 
 private:
     std::shared_ptr<T> handle;
     bool owner = false;
 };
+
+//TODO test implicit bool conversion
+//TODO T and shared_ptr<T> move constructors/assignment

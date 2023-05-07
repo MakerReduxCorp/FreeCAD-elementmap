@@ -66,7 +66,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream, const MappedName& mappedName)
     {
-        stream.write(((std::string)mappedName.data).c_str(), ((std::string)mappedName.data).size());
+        stream.write(mappedName.data->c_str(), mappedName.data->size());
         return stream;
     }
 
@@ -127,7 +127,7 @@ public:
 
 
 private:
-    LazyString data; //TODO migrate to LazyString
+    LazyString data; 
     size_t postfixStartIdx = 0;
 };
 
