@@ -23,6 +23,7 @@ void resetMemStats()
     memStats.size = 0;
 }
 
+// Macro used to check the current number of allocations and size allocated so far.
 #define CHECK_MEM(_count, _size)                                                                   \
     {                                                                                              \
         MemStats s = memStats;                                                                     \
@@ -34,6 +35,11 @@ void resetMemStats()
 
 // Code adapted from
 // https://stackoverflow.com/questions/438515/how-to-track-memory-allocations-in-c-especially-new-delete
+
+// Similar implementation:
+// http://wyw.dcweb.cn/leakage.htm
+// https://github.com/adah1972/nvwa/blob/master/nvwa/debug_new.h
+// https://github.com/adah1972/nvwa/blob/master/nvwa/debug_new.cpp
 
 template<typename T>
 struct AllocatorMalloc: std::allocator<T>
@@ -161,6 +167,8 @@ void operator delete[](void* mem, std::size_t size) throw()
 /*---------------------------------------------------------------------------------------------------------------*/
 
 
+typedef Lazy<std::string> LazyString;
+
 TEST(LazyClass, basicAllocTest)
 {
     resetMemStats();
@@ -169,4 +177,60 @@ TEST(LazyClass, basicAllocTest)
     CHECK_MEM(1, 5 * sizeof(int));
     delete[] ptr;
     CHECK_MEM(0, 0);
+}
+
+TEST(LazyClass, stringAllocTest)
+{
+    resetMemStats();
+    {
+        std::string test =
+            "TESTTESTTESTTEST";// Must be longer than 15 otherwise std::string won't allocate
+        CHECK_MEM(1, 17);
+    }
+    CHECK_MEM(0, 0);
+}
+
+TEST(LazyClass, stringCopy)
+{
+    resetMemStats();
+
+    std::string test =
+        "TESTTESTTESTTEST";// Must be longer than 15 otherwise std::string won't allocate
+    CHECK_MEM(1, 17);
+    std::string test2 = test;
+    CHECK_MEM(2, 34);
+    std::string test3 = test;
+    CHECK_MEM(3, 51);
+}
+
+TEST(LazyClass, lazyStringCopy)
+{
+    resetMemStats();
+
+    LazyString test(
+        "TESTTESTTESTTEST");// Must be longer than 15 otherwise std::string won't allocate
+    // sizeof("TESTTESTTESTTEST") = 17
+    // allocated by shared_ptr = 48
+    // 65 = 17 + 48
+    CHECK_MEM(2, 65);
+
+    // stack allocated: operator new not called.
+    LazyString test2 = test;
+    CHECK_MEM(2, 65);
+    LazyString test3 = test;
+    CHECK_MEM(2, 65);
+
+    // create a copy: new string gets allocated, with consequent shared_ptr allocation
+    test2.createLocalCopy();
+    CHECK_MEM(2 + 2, 65 + 65);
+
+    // access object without modification: no new allocations
+    EXPECT_EQ(test3->size(), 16);// I HATE CPP, why can't it call the const overload first, and then
+                                 // fallback to non-const if it doesn't work?
+    CHECK_MEM(4, 130);
+
+    // modify object: copy gets created, causes string allocation of
+    // 33 and dealloc of previous 17 to expand storage
+    (*test3) += "ANOTHER";
+    CHECK_MEM(4 + 2, 130 + (65 + 33 - 17));
 }
