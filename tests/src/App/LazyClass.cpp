@@ -225,12 +225,12 @@ TEST(LazyClass, lazyStringCopy)
     CHECK_MEM(2 + 2, 65 + 65);
 
     // access object without modification: no new allocations
-    EXPECT_EQ(test3->size(), 16);// I HATE CPP, why can't it call the const overload first, and then
-                                 // fallback to non-const if it doesn't work?
+    EXPECT_EQ(test3.asConst().size(), 16);// I HATE CPP, why can't it call the const overload first,
+                                          // and then fallback to non-const if it doesn't work?
     CHECK_MEM(4, 130);
 
     // modify object: copy gets created, causes string allocation of
     // 33 and dealloc of previous 17 to expand storage
-    (*test3) += "ANOTHER";
+    test3.asMutable() += "ANOTHER";
     CHECK_MEM(4 + 2, 130 + (65 + 33 - 17));
 }

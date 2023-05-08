@@ -2,6 +2,19 @@
 
 #include <memory>
 
+// The idea is similar to this: https://github.com/bitwizeshift/Lazy
+// but insread of deferring object construction we are deferring copy.
+// The object T wrapped by this class is referenced through a shared_ptr, 
+// so that copies of Lazy just increment the refcount instead of preforming
+// a full copy. In case the object T needs to get modified a full copy  
+// is performed, to avoid modifying the other copies owned by the shared_ptr.
+//
+// My hope was that the compiler was smart enough to deduce when it could call
+// const methods and when it had no choice but to call the non-const variant.
+// It is not. To work around this all access operators have been commented out, 
+// leaving just two functions: asConst() and asMutable(). This is way more verbose
+// to type, but also makes the behavior of the class extremely explicit and transparent. 
+// There's no guessing when a copy will be made.
 
 template <typename T>
 class Lazy {
@@ -53,6 +66,15 @@ public:
 
     bool hasLocalCopy() const { return owner; }
 
+    // Access the wrapped object in a non-modifying fashion. No copy will be made (unless
+    // a local copy was already made beforehand)
+    const T& asConst() const { return *handle; }
+
+    // Access the wrapped object to modify it. Ensures that a local copy has been
+    // made beforehand, so that the other references owned do not get modified.
+    T& asMutable() { createLocalCopy(); return *handle; }
+
+/*
     const T& get() const { return *handle; }
     T& get() { createLocalCopy(); return *handle; }
 
@@ -64,6 +86,7 @@ public:
 
     operator const T&() const { return *handle; }
     operator T&() { createLocalCopy(); return *handle; }
+*/
 
 private:
     std::shared_ptr<T> handle;

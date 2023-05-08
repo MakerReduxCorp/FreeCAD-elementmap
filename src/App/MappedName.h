@@ -66,7 +66,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& stream, const MappedName& mappedName)
     {
-        stream.write(mappedName.data->c_str(), mappedName.data->size());
+        stream.write(mappedName.data.asConst().c_str(), mappedName.data.asConst().size());
         return stream;
     }
 
