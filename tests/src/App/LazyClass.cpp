@@ -183,8 +183,8 @@ TEST(LazyClass, stringAllocTest)
 {
     resetMemStats();
     {
-        std::string test =
-            "TESTTESTTESTTEST";// Must be longer than 15 otherwise std::string won't allocate
+        // Must be longer than 15 otherwise std::string won't allocate on heap
+        std::string test = "TESTTESTTESTTEST";
         CHECK_MEM(1, 17);
     }
     CHECK_MEM(0, 0);
@@ -194,8 +194,8 @@ TEST(LazyClass, stringCopy)
 {
     resetMemStats();
 
-    std::string test =
-        "TESTTESTTESTTEST";// Must be longer than 15 otherwise std::string won't allocate
+    // Must be longer than 15 otherwise std::string won't allocate on heap
+    std::string test = "TESTTESTTESTTEST";
     CHECK_MEM(1, 17);
     std::string test2 = test;
     CHECK_MEM(2, 34);
@@ -207,8 +207,43 @@ TEST(LazyClass, lazyStringCopy)
 {
     resetMemStats();
 
-    LazyString test(
-        "TESTTESTTESTTEST");// Must be longer than 15 otherwise std::string won't allocate
+    LazyString test("TEST");
+    // sizeof("TEST") = 5  ==>  string will not allocate on heap
+    // 1 allocation by shared_ptr of 48
+    CHECK_MEM(1, 48);
+
+    // copies are stack allocated: operator new not called.
+    LazyString test2 = test;
+    CHECK_MEM(1, 48);
+    EXPECT_EQ(test2.hasLocalCopy(), false);
+
+    LazyString test3 = test;
+    CHECK_MEM(1, 48);
+    EXPECT_EQ(test3.hasLocalCopy(), false);
+
+    // create a copy: another shared_ptr allocation
+    test2.createLocalCopy();
+    CHECK_MEM(1 + 1, 48 + 48);
+    EXPECT_EQ(test2.hasLocalCopy(), true);
+
+    // access object without modification: no new allocations
+    EXPECT_EQ(test3.asConst().size(), 4);
+    CHECK_MEM(2, 96);
+    EXPECT_EQ(test3.hasLocalCopy(), false);
+
+    // modify object: copy gets created, another shared_ptr allocation
+    test3.asMutable() += "ANOTHER";
+    CHECK_MEM(2 + 1, 96 + 48);
+    EXPECT_EQ(test3.hasLocalCopy(), true);
+}
+
+
+TEST(LazyClass, lazyStringCopyLongString)
+{
+    resetMemStats();
+
+    // Must be longer than 15 otherwise std::string won't allocate on heap
+    LazyString test("TESTTESTTESTTEST");
     // sizeof("TESTTESTTESTTEST") = 17
     // allocated by shared_ptr = 48
     // 65 = 17 + 48
@@ -217,20 +252,28 @@ TEST(LazyClass, lazyStringCopy)
     // stack allocated: operator new not called.
     LazyString test2 = test;
     CHECK_MEM(2, 65);
+    EXPECT_EQ(test2.hasLocalCopy(), false);
+
     LazyString test3 = test;
     CHECK_MEM(2, 65);
+    EXPECT_EQ(test3.hasLocalCopy(), false);
 
     // create a copy: new string gets allocated, with consequent shared_ptr allocation
     test2.createLocalCopy();
     CHECK_MEM(2 + 2, 65 + 65);
+    EXPECT_EQ(test2.hasLocalCopy(), true);
 
     // access object without modification: no new allocations
-    EXPECT_EQ(test3.asConst().size(), 16);// I HATE CPP, why can't it call the const overload first,
-                                          // and then fallback to non-const if it doesn't work?
+    EXPECT_EQ(test3.asConst().size(), 16);
     CHECK_MEM(4, 130);
+    EXPECT_EQ(test3.hasLocalCopy(), false);
 
     // modify object: copy gets created, causes string allocation of
     // 33 and dealloc of previous 17 to expand storage
     test3.asMutable() += "ANOTHER";
     CHECK_MEM(4 + 2, 130 + (65 + 33 - 17));
+    EXPECT_EQ(test3.hasLocalCopy(), true);
 }
+
+
+// TODO complex test with LazyMappedName<LazyString>

@@ -93,6 +93,5 @@ private:
     bool owner = false;
 };
 
-//TODO test implicit bool conversion
 //TODO T and shared_ptr<T> move constructors/assignment
 //TODO LazyString = const char* does not work, but LazyString(const char*) does
