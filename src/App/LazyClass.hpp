@@ -4,10 +4,15 @@
 
 // The idea is similar to this: https://github.com/bitwizeshift/Lazy
 // but insread of deferring object construction we are deferring copy.
+// See also similar lazy evaluation: https://stackoverflow.com/a/17720749
+//
 // The object T wrapped by this class is referenced through a shared_ptr, 
 // so that copies of Lazy just increment the refcount instead of preforming
-// a full copy. In case the object T needs to get modified a full copy  
-// is performed, to avoid modifying the other copies owned by the shared_ptr.
+// a full copy of the wrapped object. In case the object T needs to get modified a full copy  
+// is performed, to avoid modifying the other references owned by the shared_ptr.
+//
+// The intention is to replicate the behavior of QByteArray, but for any generic type T.
+// https://doc.qt.io/qt-6/qbytearray.html
 //
 // My hope was that the compiler was smart enough to deduce when it could call
 // const methods and when it had no choice but to call the non-const variant.
