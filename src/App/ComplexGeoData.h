@@ -28,9 +28,11 @@
 #include <Base/Handle.h>
 #include <Base/Matrix.h>
 #include <Base/Persistence.h>
+#include "StringHasher.h"
+#include "ElementMap.h"
 
 #ifdef __GNUC__
-# include <cstdint>
+#include <cstdint>
 #endif
 
 
@@ -250,6 +252,10 @@ protected:
     }
 public:
     mutable long Tag;
+    /// String hasher for element name shortening
+    mutable App::StringHasherRef Hasher;
+private:
+    ElementMapPtr _ElementMap;
 };
 
 } //namespace App

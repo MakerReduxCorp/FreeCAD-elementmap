@@ -35,7 +35,6 @@
 #include <QHash>
 #include <QVector>
 
-#include "ComplexGeoData.h"
 #include "IndexedName.h"
 #include "StringHasher.h"
 #include "PostfixStringReferences.h"
