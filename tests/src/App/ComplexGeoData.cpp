@@ -14,7 +14,7 @@ public:
     std::string getName() const override {};
 };
 
-class TestCGDClass: ::Data::ComplexGeoData {
+class TestCGDClass: public ::Data::ComplexGeoData {
 public:
     TestCGDClass() {
         _testSegment = TestSegmentClass();
@@ -52,6 +52,19 @@ TEST_F(ComplexGeoDataTest, defaultConstruction)
 
     // Assert
     EXPECT_EQ(sz, 0);
+}
+
+TEST_F(ComplexGeoDataTest, emptyMappedNameWhenElementNotFound)
+{
+    // Arrange
+    TestCGDClass emptyTest = TestCGDClass();  // TODO: also add a non-empty elementmap, but still not found.
+    auto indexedName = Data::IndexedName("face", 1);
+
+    // Act
+    auto mappedName = emptyTest.getMappedName(indexedName, false, nullptr);
+
+    // Assert
+    EXPECT_EQ(mappedName.toString(), "");
 }
 
 // NOLINTEND(readability-magic-numbers)

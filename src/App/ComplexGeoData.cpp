@@ -247,3 +247,22 @@ bool ComplexGeoData::hasMissingElement(const char *subname) {
         subname = dot+1;
     return boost::starts_with(subname, MISSING_PREFIX);
 }
+
+MappedName ComplexGeoData::getMappedName(const IndexedName & element,
+                                         bool allowUnmapped,
+                                         ElementIDRefs *sid) const
+{
+    if (!element)
+        return MappedName();
+    // _ElementMap.flushElementMap();  // this function does nothing?
+    if(!_ElementMap) {
+        if (allowUnmapped)
+            return MappedName(element);
+        return MappedName();
+    }
+
+    MappedName name = _ElementMap->find(element, sid);
+    if (allowUnmapped && !name)
+        return MappedName(element);
+    return name;
+}

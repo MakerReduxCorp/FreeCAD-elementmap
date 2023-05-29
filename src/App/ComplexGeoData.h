@@ -192,6 +192,18 @@ public:
         return isMappedElement(findElementName(subname));
     }
     //@}
+    /** Get element mapped name
+     *
+     * @param name: the input name
+     * @param allowUnmapped: If the queried element is not mapped, then return
+     *                       an empty name if \c allowUnmapped is false, or
+     *                       else, return the indexed name.
+     * @param sid: optional output of and App::StringID involved forming this mapped name
+     * @return Returns the mapped name.
+     */
+    MappedName getMappedName(const IndexedName & element,
+                             bool allowUnmapped = false,
+                             ElementIDRefs *sid = nullptr) const;
 
 protected:
 
